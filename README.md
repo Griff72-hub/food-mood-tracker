@@ -1,17 +1,3 @@
-# Food & Mood Tracker
+# Food & Mood Tracker v2
 
-A small iPhone-friendly progressive web app. Entries are stored in the browser using localStorage.
-
-## Quick test
-Open `index.html` in a browser. Most features work immediately.
-
-## Install on an iPhone
-The app must be hosted over HTTPS for offline installation. Upload all three app files to a static host, open the resulting address in Safari, tap Share, then Add to Home Screen.
-
-## Files
-- `index.html`: complete app
-- `manifest.webmanifest`: install metadata
-- `sw.js`: offline cache
-
-## Privacy
-Entries remain in that browser profile unless exported. Clearing Safari website data may delete them, so use Export data regularly.
+Replace all existing GitHub Pages files with these files. Existing entries use the same browser storage key and should remain. New features: editing, passcode privacy screen, automatic re-lock, shareable JSON backup, CSV export, and app icons. The passcode is a privacy screen, not encryption.
