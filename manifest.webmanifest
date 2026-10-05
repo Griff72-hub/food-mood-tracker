@@ -1,0 +1,9 @@
+{
+  "name": "Food & Mood Tracker",
+  "short_name": "Food & Mood",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3f6f8",
+  "theme_color": "#005eb8",
+  "description": "A private food and mood diary."
+}

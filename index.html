@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#005eb8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Food & Mood">
+  <title>Food & Mood</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    :root { --blue:#005eb8; --blue2:#003d78; --pale:#e8f1f8; --ink:#24303b; --muted:#65727e; --card:#fff; --bg:#f3f6f8; --red:#b42318; --green:#087f5b; }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif; color:var(--ink); background:var(--bg); padding-bottom:calc(82px + env(safe-area-inset-bottom)); }
+    header { background:linear-gradient(135deg,var(--blue),var(--blue2)); color:white; padding:calc(18px + env(safe-area-inset-top)) 18px 18px; }
+    header h1 { margin:0 0 4px; font-size:1.55rem; } header p { margin:0; opacity:.9; font-size:.92rem; }
+    main { max-width:720px; margin:auto; padding:16px; }
+    .view { display:none; } .view.active { display:block; }
+    .card { background:var(--card); border-radius:16px; padding:16px; box-shadow:0 2px 12px rgba(0,0,0,.07); margin-bottom:14px; }
+    h2 { font-size:1.25rem; margin:0 0 14px; } h3 { font-size:1rem; margin:0 0 10px; }
+    label { display:block; font-weight:650; margin:14px 0 7px; }
+    .hint { color:var(--muted); font-size:.82rem; font-weight:400; }
+    input, select, textarea { width:100%; font:inherit; font-size:16px; border:1px solid #bcc7d1; border-radius:11px; padding:12px; background:#fff; color:var(--ink); }
+    textarea { min-height:86px; resize:vertical; }
+    input:focus, select:focus, textarea:focus { outline:3px solid rgba(0,94,184,.2); border-color:var(--blue); }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .moods { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; }
+    .mood input { position:absolute; opacity:0; pointer-events:none; }
+    .mood label { margin:0; padding:9px 3px; border:2px solid transparent; border-radius:12px; text-align:center; background:var(--pale); font-weight:500; cursor:pointer; }
+    .mood label span { display:block; font-size:1.55rem; line-height:1.3; }
+    .mood label small { font-size:.68rem; }
+    .mood input:checked + label { border-color:var(--blue); background:#d5e9f6; }
+    .range-row { display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px; }
+    input[type=range] { padding:0; accent-color:var(--blue); }
+    output { min-width:38px; text-align:center; background:var(--pale); border-radius:9px; padding:7px; font-weight:700; }
+    .btn { border:0; border-radius:12px; padding:13px 16px; font:inherit; font-weight:700; cursor:pointer; }
+    .primary { background:var(--blue); color:white; width:100%; margin-top:17px; }
+    .secondary { background:var(--pale); color:var(--blue2); }
+    .danger { background:#fee4e2; color:var(--red); }
+    .btnrow { display:flex; gap:8px; flex-wrap:wrap; }
+    .entry { border-left:5px solid var(--blue); }
+    .entry-head { display:flex; justify-content:space-between; gap:10px; align-items:start; }
+    .entry h3 { margin:0 0 5px; }
+    .meta { color:var(--muted); font-size:.84rem; }
+    .chips { display:flex; gap:6px; flex-wrap:wrap; margin:9px 0; }
+    .chip { background:var(--pale); padding:5px 8px; border-radius:999px; font-size:.8rem; }
+    .entry p { white-space:pre-wrap; margin:8px 0; }
+    .empty { text-align:center; color:var(--muted); padding:28px 10px; }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+    .stat { text-align:center; background:var(--pale); border-radius:12px; padding:12px 6px; }
+    .stat strong { display:block; font-size:1.45rem; color:var(--blue2); }
+    .bar { height:10px; background:#dfe6ec; border-radius:99px; overflow:hidden; margin-top:4px; }
+    .bar i { display:block; height:100%; background:var(--blue); }
+    nav { position:fixed; z-index:10; left:0; right:0; bottom:0; display:grid; grid-template-columns:repeat(4,1fr); background:white; border-top:1px solid #dbe2e8; padding-bottom:env(safe-area-inset-bottom); }
+    nav button { border:0; background:white; color:var(--muted); padding:10px 4px; font-size:.72rem; }
+    nav button span { display:block; font-size:1.35rem; margin-bottom:2px; }
+    nav button.active { color:var(--blue); font-weight:700; }
+    .toast { display:none; position:fixed; left:50%; transform:translateX(-50%); bottom:95px; background:#17324d; color:white; padding:10px 15px; border-radius:10px; z-index:20; }
+    .privacy { font-size:.83rem; color:var(--muted); }
+    @media(max-width:420px){ .grid2{grid-template-columns:1fr;} .stats{grid-template-columns:1fr 1fr;} }
+  </style>
+</head>
+<body>
+<header><h1>Food & Mood</h1><p>A quick, private record of what you eat and how you feel.</p></header>
+<main>
+  <section id="log" class="view active">
+    <form id="entryForm" class="card">
+      <h2>New entry</h2>
+      <div class="grid2">
+        <div><label for="when">Date and time</label><input id="when" type="datetime-local" required></div>
+        <div><label for="meal">Meal</label><select id="meal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option><option>Drink</option><option>Other</option></select></div>
+      </div>
+      <label for="food">What did you eat or drink?</label>
+      <textarea id="food" required placeholder="For example: chicken wrap, crisps and Diet Coke"></textarea>
+      <label>Mood before <span class="hint">optional</span></label><div class="moods" id="beforeMoods"></div>
+      <label>Mood after <span class="hint">optional</span></label><div class="moods" id="afterMoods"></div>
+      <div class="grid2">
+        <div><label for="energy">Energy <span class="hint">1 low, 5 high</span></label><div class="range-row"><input id="energy" type="range" min="1" max="5" value="3"><output id="energyOut">3</output></div></div>
+        <div><label for="stress">Stress <span class="hint">1 low, 5 high</span></label><div class="range-row"><input id="stress" type="range" min="1" max="5" value="3"><output id="stressOut">3</output></div></div>
+      </div>
+      <label for="notes">Notes <span class="hint">optional</span></label><textarea id="notes" placeholder="Hunger, symptoms, context, cravings or anything else"></textarea>
+      <details><summary style="margin-top:14px;font-weight:650">Optional health details</summary>
+        <div class="grid2"><div><label for="glucose">Blood glucose</label><input id="glucose" inputmode="decimal" type="number" step="0.1" min="0" placeholder="mmol/L"></div><div><label for="carbs">Approx. carbohydrates</label><input id="carbs" inputmode="decimal" type="number" step="1" min="0" placeholder="grams"></div></div>
+      </details>
+      <button class="btn primary" type="submit">Save entry</button>
+    </form>
+    <p class="privacy">Your entries are stored only in this browser on this device unless you export them. This tracker is not a medical device.</p>
+  </section>
+
+  <section id="history" class="view"><div class="card"><h2>History</h2><div class="grid2"><select id="filterMeal"><option value="">All meals</option><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option><option>Drink</option><option>Other</option></select><input id="search" type="search" placeholder="Search food or notes"></div></div><div id="entries"></div></section>
+  <section id="insights" class="view"><div class="card"><h2>Insights</h2><div id="insightContent"></div></div></section>
+  <section id="settings" class="view"><div class="card"><h2>Data and settings</h2><p>Your data remains in Safari's local storage. Export a backup regularly.</p><div class="btnrow"><button id="exportBtn" class="btn secondary">Export data</button><label class="btn secondary" style="margin:0">Import data<input id="importFile" type="file" accept="application/json" hidden></label><button id="clearBtn" class="btn danger">Delete all data</button></div></div><div class="card"><h3>Install on iPhone</h3><ol><li>Open the hosted app in Safari.</li><li>Tap the Share button.</li><li>Select <strong>Add to Home Screen</strong>.</li></ol></div></section>
+</main>
+<nav aria-label="Main navigation">
+  <button data-view="log" class="active"><span>➕</span>Log</button><button data-view="history"><span>📋</span>History</button><button data-view="insights"><span>📊</span>Insights</button><button data-view="settings"><span>⚙️</span>Settings</button>
+</nav><div id="toast" class="toast" role="status"></div>
+<script>
+const KEY='foodMoodEntriesV1';
+const moodData=[['1','😣','Bad'],['2','😟','Low'],['3','😐','OK'],['4','🙂','Good'],['5','😀','Great']];
+function moodPicker(name,target){ target.innerHTML=moodData.map(([v,e,t])=>`<div class="mood"><input type="radio" id="${name}${v}" name="${name}" value="${v}"><label for="${name}${v}"><span>${e}</span><small>${t}</small></label></div>`).join(''); }
+moodPicker('before',document.querySelector('#beforeMoods')); moodPicker('after',document.querySelector('#afterMoods'));
+const $=s=>document.querySelector(s); const entries=()=>JSON.parse(localStorage.getItem(KEY)||'[]');
+function localNow(){const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,16)}
+$('#when').value=localNow();
+['energy','stress'].forEach(id=>$('#'+id).addEventListener('input',e=>$('#'+id+'Out').value=e.target.value));
+function toast(t){const x=$('#toast');x.textContent=t;x.style.display='block';setTimeout(()=>x.style.display='none',1800)}
+function esc(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function moodEmoji(v){return moodData.find(x=>x[0]===String(v))?.[1]||'—'}
+$('#entryForm').addEventListener('submit',e=>{e.preventDefault(); const getMood=n=>document.querySelector(`input[name=${n}]:checked`)?.value||''; const data=entries(); data.unshift({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),when:$('#when').value,meal:$('#meal').value,food:$('#food').value.trim(),before:getMood('before'),after:getMood('after'),energy:+$('#energy').value,stress:+$('#stress').value,notes:$('#notes').value.trim(),glucose:$('#glucose').value,carbs:$('#carbs').value}); localStorage.setItem(KEY,JSON.stringify(data)); e.target.reset(); $('#when').value=localNow(); $('#energy').value=$('#stress').value=3; $('#energyOut').value=$('#stressOut').value=3; toast('Entry saved'); renderAll();});
+function renderHistory(){let data=entries(), q=$('#search').value.toLowerCase(), meal=$('#filterMeal').value; data=data.filter(x=>(!meal||x.meal===meal)&&(!q||(x.food+' '+x.notes).toLowerCase().includes(q))); $('#entries').innerHTML=data.length?data.map(x=>`<article class="card entry"><div class="entry-head"><div><h3>${esc(x.meal)} · ${esc(x.food)}</h3><div class="meta">${new Date(x.when).toLocaleString()}</div></div><button class="btn danger" onclick="removeEntry('${x.id}')" aria-label="Delete entry">Delete</button></div><div class="chips"><span class="chip">Before ${moodEmoji(x.before)}</span><span class="chip">After ${moodEmoji(x.after)}</span><span class="chip">Energy ${x.energy}/5</span><span class="chip">Stress ${x.stress}/5</span>${x.glucose?`<span class="chip">Glucose ${esc(x.glucose)} mmol/L</span>`:''}${x.carbs?`<span class="chip">Carbs ${esc(x.carbs)} g</span>`:''}</div>${x.notes?`<p>${esc(x.notes)}</p>`:''}</article>`).join(''):'<div class="card empty">No matching entries yet.</div>'}
+window.removeEntry=id=>{if(confirm('Delete this entry?')){localStorage.setItem(KEY,JSON.stringify(entries().filter(x=>x.id!==id)));renderAll();toast('Entry deleted')}};
+function average(data,key){const v=data.map(x=>+x[key]).filter(Boolean);return v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1):'—'}
+function renderInsights(){const d=entries(), last7=d.filter(x=>Date.now()-new Date(x.when).getTime()<=7*86400000), changes=d.filter(x=>x.before&&x.after).map(x=>+x.after-+x.before); const change=changes.length?(changes.reduce((a,b)=>a+b,0)/changes.length).toFixed(1):'—'; const meals={};d.forEach(x=>meals[x.meal]=(meals[x.meal]||0)+1); const max=Math.max(1,...Object.values(meals)); $('#insightContent').innerHTML=d.length?`<p class="meta">Based on ${d.length} saved ${d.length===1?'entry':'entries'}; ${last7.length} in the last 7 days.</p><div class="stats"><div class="stat"><strong>${average(last7,'after')}</strong>Avg mood</div><div class="stat"><strong>${average(last7,'energy')}</strong>Avg energy</div><div class="stat"><strong>${average(last7,'stress')}</strong>Avg stress</div></div><h3 style="margin-top:18px">Average mood change after eating</h3><p><strong>${change==='—'?'Not enough data':(change>0?'↑ +':'')+change}</strong> ${change==='—'?'Log both before and after mood to see this.':'points per entry with both moods logged.'}</p><h3 style="margin-top:18px">Entries by meal</h3>${Object.entries(meals).map(([k,v])=>`<div style="margin:9px 0"><div class="meta">${esc(k)}: ${v}</div><div class="bar"><i style="width:${v/max*100}%"></i></div></div>`).join('')}`:'<div class="empty">Log a few meals to start seeing patterns.</div>'}
+function renderAll(){renderHistory();renderInsights()}
+$('#search').addEventListener('input',renderHistory); $('#filterMeal').addEventListener('change',renderHistory);
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));$('#'+b.dataset.view).classList.add('active');b.classList.add('active');window.scrollTo(0,0);renderAll()}));
+$('#exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(entries(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='food-mood-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href)};
+$('#importFile').onchange=async e=>{try{const data=JSON.parse(await e.target.files[0].text());if(!Array.isArray(data))throw Error();localStorage.setItem(KEY,JSON.stringify(data));renderAll();toast('Data imported')}catch{alert('That file is not a valid Food & Mood backup.')}e.target.value=''};
+$('#clearBtn').onclick=()=>{if(entries().length&&confirm('Permanently delete every entry on this device?')){localStorage.removeItem(KEY);renderAll();toast('All data deleted')}};
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+renderAll();
+</script>
+</body></html>
